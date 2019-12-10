@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.stream.Collectors;
 import java.util.Comparator;
 
+//deprecated:
 //import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
 
 import org.springframework.hateoas.server.mvc.ControllerLinkRelationProvider;
