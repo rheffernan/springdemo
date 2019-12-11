@@ -1,0 +1,75 @@
+targets:
+  tutorial:
+    api: http://127.0.0.1:8080
+    team: main
+    token:
+      type: Bearer
+      value: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJjc3JmIjoiYjE3ZDgxZmMwMWIxNDE1Mjk2OWIyZDc4NWViZmVjM2EzM2IyY2MxYWZjZjU3Njc1ZWYwYzY0MTM3MWMzNzI3OSIsImV4cCI6MTUyMjcwMjUwMCwiaXNBZG1pbiI6dHJ1ZSwidGVhbU5hbWUiOiJtYWluIn0.JNutBGQJMKyFzow5eQOTXAw3tOeM8wmDGMtZ-GCsAVoB7D1WHv-nHIb3Rf1zWw166FuCrFqyLYnMroTlQHyPQUTJFDTiMEGnc5AY8wjPjgpwjsjyJ465ZX-70v1J4CWcTHjRGrB1XCfSs652s8GJQlDf0x2hi5K0xxvAxsb0svv6MRs8aw1ZPumguFOUmj-rBlum5k8vnV-2SW6LjYJAnRwoj8VmcGLfFJ5PXGHeunSlMdMNBgHEQgmMKf7bFBPKtRuEAglZWBSw9ryBopej7Sr3VHPZEck37CPLDfwqfKErXy_KhBA_ntmZ87H1v3fakyBSzxaTDjbpuOFZ9yDkGA
+
+resources:
+   - name: demogit
+     type: git
+     source: {uri: "https://github.com/rheffernan/springdemo.git"}
+   - name: buildcontainer
+     type: docker-image
+     source:
+        repository: gradle 
+        tag: 6.0.1-jre11
+
+
+jobs:
+- name: prep
+  public: true
+  plan:
+  - get: demogit
+    trigger: true
+  - get: buildcontainer
+    trigger: true
+  - task: finder 
+    config:
+       platform: linux
+       image_resource:
+          type: docker-image
+          source:
+             repository: openjdk
+             tag: 11-jdk
+       run:
+          path: sh
+          args:
+             - -c
+             - |
+               find . -name build.sh
+       inputs: [{name: demogit}]
+
+- name: builder 
+  public: true
+  plan:
+  - get: demogit 
+    passed: [prep]
+    trigger: true
+  - get: buildcontainer
+    passed: [prep]
+    trigger: true
+  - task: build
+    config:
+       platform: linux
+       image_resource:
+          type: docker-image
+          source:
+             repository: openjdk
+             tag: 11-jdk
+       inputs: [{name: buildcontainer}]
+       run:
+          path: sh
+          args:
+             - -c
+             - |
+               cd demogit
+               ./build.sh
+
+groups:
+- name: main
+  jobs:
+      - prep
+      - builder
+
