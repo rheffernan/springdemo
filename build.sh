@@ -1,2 +1,2 @@
-./gradlew build war
+./gradlew build
 
