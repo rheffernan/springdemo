@@ -1,6 +1,6 @@
 targets:
   tutorial:
-    api: http://desk1.fairuse.org:8080
+    api: http://127.0.0.1:8080
     team: main
     token:
       type: Bearer
@@ -19,10 +19,10 @@ resources:
      type: s3
      source:
         bucket: rheffernan
-        versioned_file: demo-0.0.1-SNAPSHOT.war
-        access_key_id: S9FDJ1ECW34720W2XZD9
-        secret_access_key: 4Kptslz++ZawUKfyENbEkl3BuYsf7uGfm1yUvJve
-        endpoint: http://desk1.fairuse.org:9000/
+        versioned_file: demo.war 
+        access_key_id: KT5Y6U6LKWGPFT1A016F
+        secret_access_key: p6fPB2MqUx5jjPjLhImGIDZPMzd4LfPltui0LBZY
+        endpoint: http://10.1.34.198:9000/
 
 jobs:
 - name: prep
@@ -47,52 +47,38 @@ jobs:
              - |
                find . -name build.sh
        inputs: [{name: demogit}]
-  - task: builder
-    config:
-       platform: linux
-       image_resource:
-          type: docker-image
-          source:
-             repository: openjdk
-             tag: 11-jdk
-       inputs: [{name: demogit}]
-       outputs: [{name: build/libs/demo-0.0.1-SNAPSHOT.war}]
-       run:
-          path: sh
-          args:
-             - -c
-             - |
-               cd demogit
-               ./build.sh
-  - task: finder2 
-    config:
-       platform: linux
-       inputs: [{name: build/libs/demo-0.0.1-SNAPSHOT.war}]
-       image_resource:
-          type: docker-image
-          source:
-             repository: openjdk
-             tag: 11-jdk
-       run:
-          path: sh
-          args:
-             - -c
-             - |
-               find . -name "*.war"
-               find . -type d -exec ls -al {} \; 
-  - put: demowar
-    params:
-       file: build/libs/demo-0.0.1-SNAPSHOT.war
-  
+
+   - task: builder
+     public: true
+     inputs: [demogit]
+     - task: build
+       config:
+          platform: linux
+          image_resource:
+             type: docker-image
+             source:
+                repository: openjdk
+                tag: 11-jdk
+          inputs: [{name: buildcontainer}]
+          run:
+             path: sh
+             args:
+                - -c
+                - |
+                  cd demogit
+                  ./build.sh
 
 
-- name: itest 
+- name: builder 
   public: true
   plan:
-  - get: demowar
+  - get: demogit 
     passed: [prep]
     trigger: true
-  - task: test
+  - get: buildcontainer
+    passed: [prep]
+    trigger: true
+  - task: build
     config:
        platform: linux
        image_resource:
@@ -107,10 +93,14 @@ jobs:
              - -c
              - |
                cd demogit
-               ./test.sh
+               ./build.sh
+  - put: demowar
+    params:
+       file: demogit/classes/demo.war
+  
 groups:
 - name: main
   jobs:
       - prep
-      - itest
+      - builder
 
