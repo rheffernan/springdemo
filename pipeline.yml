@@ -15,14 +15,15 @@ resources:
      source:
         repository: gradle 
         tag: 6.0.1-jre11
+
    - name: demowar
      type: s3
      source:
-        bucket: rheffernan
+        bucket: concourse-ronan
         versioned_file: demo-0.0.1-SNAPSHOT.war
-        access_key_id: S9FDJ1ECW34720W2XZD9
-        secret_access_key: 4Kptslz++ZawUKfyENbEkl3BuYsf7uGfm1yUvJve
-        endpoint: http://desk1.fairuse.org:9000/
+        access_key_id: AKIA4MRXME6U6KZPE56G
+        secret_access_key: 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 
+        region: us-east-1
 
 jobs:
 - name: prep
@@ -56,18 +57,20 @@ jobs:
              repository: openjdk
              tag: 11-jdk
        inputs: [{name: demogit}]
-       outputs: [{name: build/libs/demo-0.0.1-SNAPSHOT.war}]
+       outputs: [{name: outwar}]
        run:
           path: sh
           args:
              - -c
              - |
                cd demogit
-               ./build.sh
+               ./gradlew -i build
+               cp build/libs/demo-0.0.1-SNAPSHOT.war ../outwar
+
   - task: finder2 
     config:
        platform: linux
-       inputs: [{name: build/libs/demo-0.0.1-SNAPSHOT.war}]
+       inputs: [{name: outwar}]
        image_resource:
           type: docker-image
           source:
@@ -78,11 +81,13 @@ jobs:
           args:
              - -c
              - |
-               find . -name "*.war"
-               find . -type d -exec ls -al {} \; 
+               pwd
+               find . | grep  "war"
+               find .. -name "*.war" -exec ls -al {} \;
+               find ..
   - put: demowar
     params:
-       file: build/libs/demo-0.0.1-SNAPSHOT.war
+       file: outwar/demo-0.0.1-SNAPSHOT.war
   
 
 
