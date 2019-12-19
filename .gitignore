@@ -1,3 +1,5 @@
+pipeline.yml.hazard
+pipeline.sh
 HELP.md
 .gradle
 build/
