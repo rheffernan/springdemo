@@ -31,6 +31,7 @@ jobs:
   public: true
   plan:
   - get: demogit
+    passed: [statican]
     trigger: true
   - get: buildcontainer
     trigger: true
