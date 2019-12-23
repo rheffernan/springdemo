@@ -133,7 +133,11 @@ jobs:
              - -c
              - |
                find .
-               java -jar demowar/demo-0.0.1-SNAPSHOT.war test
+               java -jar demowar/demo-0.0.1-SNAPSHOT.war &
+               sleep 45
+               curl "http://localhost:8080/employees" | grep Frodo
+               env
+               
 groups:
 - name: main
   jobs:
