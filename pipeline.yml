@@ -136,7 +136,8 @@ jobs:
                java -jar demowar/demo-0.0.1-SNAPSHOT.war &
                sleep 45
                curl "http://localhost:8080/employees" | grep Frodo
-               env
+               curl "http://localhost:8080/employees/1" | grep Bilbo
+               curl "http://localhost:8080/employees/2" | grep Frodo
                
 groups:
 - name: main
