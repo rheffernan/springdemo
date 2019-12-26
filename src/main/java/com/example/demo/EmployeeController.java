@@ -4,7 +4,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 //deprecated:
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
 class EmployeeController {
 
     private final EmployeeRepository repository;
-    private Logger logger = Logger.getLogger(EmployeeController.class.getName());
+    //private Logger logger = Logger.getLogger(EmployeeController.class.getName());
 
     EmployeeController(EmployeeRepository repository) {
         this.repository = repository;
