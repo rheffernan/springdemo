@@ -60,11 +60,16 @@ jobs:
              tag: 11-jdk
        inputs: [{name: demogit}]
        outputs: [{name: outwar}]
+       caches: 
+          - path: .gradle/
+          - path: .m2/
        run:
           path: sh
           args:
              - -c
              - |
+               export ROOT_FOLDER=$( pwd )
+               export GRADLE_USER_HOME="${ROOT_FOLDER}/.gradle"
                cd demogit
                ./gradlew -i build
                cp build/libs/demo-0.0.1-SNAPSHOT.war ../outwar
